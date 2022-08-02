@@ -9,6 +9,9 @@
 //      if true, will flip the footprint such that the pcb can be reversible
 //    keycaps: default is false
 //      if true, will add choc sized keycap box around the footprint
+//    diodes: default is false
+//      if true, will add diode pads and paths
+//      (snatched from https://github.com/crides/choc/tree/master/pg1350.pretty)
 // 
 // note: hotswap and reverse can be used simultaneously
 
@@ -21,7 +24,8 @@ module.exports = {
     class: 'S',
     hotswap: false,
     reverse: false,
-    keycaps: false
+    keycaps: false,
+    diodes: false,
   },
   body: p => {
     const standard = `
@@ -56,8 +60,22 @@ module.exports = {
       (fp_line (start 9 8.5) (end -9 8.5) (layer Dwgs.User) (width 0.15))
       (fp_line (start -9 8.5) (end -9 -8.5) (layer Dwgs.User) (width 0.15))
       `
+
+    // NOTE: Diodes only coded for hot-swaps on the back side
+    const diode = `
+      (attr smd)
+      ${'' /* diode mark */}
+      (fp_line (start -2.25 6.35) (end -2.25 4.35) (layer B.SilkS) (width 0.12))
+      (fp_line (start -2.25 4.35) (end 1.65 4.35) (layer B.SilkS) (width 0.12))
+      (fp_line (start -2.25 6.35) (end 1.65 6.35) (layer B.SilkS) (width 0.12))
+
+      ${'' /* smd pads */}
+      (pad 2 smd rect (at 1.65 5.334 ${p.rot}) (size 0.9 1.2) (layers B.Cu B.Mask B.Paste) ${p.local_net('D').str})
+      (pad 3 smd rect (at -1.65 5.334 ${p.rot}) (size 0.9 1.2) (layers B.Cu B.Mask B.Paste) ${p.net.to.str})
+      `
     function pins(def_neg, def_pos, def_side) {
-      if(p.param.hotswap) {
+      if (p.param.hotswap) {
+        const exit = p.param.diodes ? p.local_net('D').str : p.net.to.str
         return `
           ${'' /* holes */}
           (pad "" np_thru_hole circle (at ${def_pos}5 -3.75) (size 3 3) (drill 3) (layers *.Cu *.Mask))
@@ -65,19 +83,20 @@ module.exports = {
       
           ${'' /* net pads */}
           (pad 1 smd rect (at ${def_neg}3.275 -5.95 ${p.rot}) (size 2.6 2.6) (layers ${def_side}.Cu ${def_side}.Paste ${def_side}.Mask)  ${p.net.from.str})
-          (pad 2 smd rect (at ${def_pos}8.275 -3.75 ${p.rot}) (size 2.6 2.6) (layers ${def_side}.Cu ${def_side}.Paste ${def_side}.Mask)  ${p.net.to.str})
+          (pad 2 smd rect (at ${def_pos}8.275 -3.75 ${p.rot}) (size 2.6 2.6) (layers ${def_side}.Cu ${def_side}.Paste ${def_side}.Mask)  ${exit})
         `
       } else {
-          return `
+        return `
             ${''/* pins */}
             (pad 1 thru_hole circle (at ${def_pos}5 -3.8) (size 2.032 2.032) (drill 1.27) (layers *.Cu *.Mask) ${p.net.from.str})
-            (pad 2 thru_hole circle (at ${def_pos}0 -5.9) (size 2.032 2.032) (drill 1.27) (layers *.Cu *.Mask) ${p.net.to.str})
+            (pad 2 thru_hole circle (at ${def_pos}0 -5.9) (size 2.032 2.032) (drill 1.27) (layers *.Cu *.Mask) ${exit})
           `
       }
     }
-    if(p.param.reverse) {
+    if (p.param.reverse) {
       return `
         ${standard}
+        ${p.param.diodes ? diode : ''}
         ${p.param.keycaps ? keycap : ''}
         ${pins('-', '', 'B')}
         ${pins('', '-', 'F')})
@@ -85,6 +104,7 @@ module.exports = {
     } else {
       return `
         ${standard}
+        ${p.param.diodes ? diode : ''}
         ${p.param.keycaps ? keycap : ''}
         ${pins('-', '', 'B')})
         `

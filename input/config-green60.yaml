@@ -1,0 +1,257 @@
+# Layout: http://www.keyboard-layout-editor.com/#/gists/5bd4a967a8748b6ff2586b867e059fac
+points:
+  key:
+    padding: cy
+    tags:
+      1u: true
+    footprints:
+      choc_hotswap:
+        type: choc
+        nets:
+          from: =column_net
+          to: =row_net
+        params:
+          keycaps: true
+          hotswap: true
+          reverse: false
+          diodes: true
+  zones:
+    board:
+      anchor:
+        rotate: 9
+      columns:
+        outer:
+          row_overrides:
+            home:
+              column_net: P2
+              row_net: P19
+              mirror:
+                column_net: P9
+            top:
+              column_net: P2
+              row_net: P15
+              mirror:
+                column_net: P9
+        pinkie:
+          spread: cx
+          stagger: cy/-2
+          row_overrides:
+            bottom:
+              column_net: P3
+              row_net: P19
+              mirror:
+                column_net: P8
+            home:
+              column_net: P3
+              row_net: P15
+              bind: [0, 3, 0, 0]
+              mirror:
+                column_net: P8
+            top:
+              column_net: P2
+              row_net: P14
+              bind: [0, 3, 0, 0]
+              mirror:
+                column_net: P9
+        ring:
+          spread: cx-1
+          rotate: -5
+          origin: [-12, -19]
+          stagger: 12
+          row_overrides:
+            bottom:
+              column_net: P4
+              row_net: P19
+              mirror:
+                column_net: P7
+            home:
+              column_net: P4
+              row_net: P15
+              mirror:
+                column_net: P7
+            top:
+              column_net: P3
+              row_net: P14
+              mirror:
+                column_net: P8
+        middle:
+          spread: cx
+          stagger: 5 -cy
+          rows:
+            thumb:
+              column_net: P5
+              row_net: P19
+              mirror:
+                column_net: P6
+            bottom:
+              column_net: P4
+              row_net: P18
+              mirror:
+                column_net: P7
+            home:
+              column_net: P5
+              row_net: P15
+              mirror:
+                column_net: P6
+            top:
+              column_net: P4
+              row_net: P14
+              mirror:
+                column_net: P7
+        index:
+          spread: cx
+          stagger: -6 +cy
+          row_overrides:
+            bottom:
+              column_net: P5
+              row_net: P18
+              mirror:
+                column_net: P6
+            home:
+              column_net: P21
+              row_net: P15
+              mirror:
+                column_net: P10
+            top:
+              column_net: P5
+              row_net: P14
+              mirror:
+                column_net: P6
+        inner:
+          spread: cx
+          stagger: -2
+          row_overrides:
+            bottom:
+              column_net: P21
+              row_net: P18
+              mirror:
+                column_net: P10
+            home:
+              column_net: P20
+              row_net: P15
+              mirror:
+                column_net: P16
+            top:
+              column_net: P21
+              row_net: P14
+              mirror:
+                column_net: P10
+        center:
+          spread: cx
+          stagger: 10
+          row_overrides:
+            home:
+              column_net: P20
+              row_net: P18
+              tags:
+                15u: true
+                1u: false
+              rotate: 90
+              mirror:
+                column_net: P16
+            top:
+              column_net: P20
+              row_net: P14
+              shift: [0, cy*0.3]
+              mirror:
+                column_net: P16
+      rows:
+        thumb:
+        bottom:
+        home:
+        top:
+    thumbfan:
+      anchor:
+        ref: board_inner_bottom
+        shift: [-cx/2, -cy]
+      columns:
+        near:
+          rows:
+            thumb:
+              column_net: P21
+              row_net: P19
+              bind: [5, 8, 0, 0]
+              mirror:
+                column_net: P10
+        home:
+          spread: 21.25
+          rotate: 16
+          origin: [-2, 13]
+          row_overrides:
+            thumb:
+              column_net: P20
+              row_net: P19
+              tags:
+                15u: true
+                1u: false
+                rotate: 90
+              mirror:
+                column_net: P16
+      rows:
+        thumb:
+      key:
+        size: 2u
+  rotate: -20
+  mirror:
+    ref: board_center_home
+    distance: 42
+
+outlines:
+  exports:
+    keys_raw:
+      - type: keys
+        side: both
+        size: [1cx + .5, 1cy + .5]
+    _rectangle_fill:
+      - type: rectangle
+        mirror: true
+        anchor:
+          ref: board_index_bottom
+          shift: [-cx*0.25, -cy*0.25]
+        size: [100, cy*2.5]
+    _plate60:
+      - type: rectangle
+        size: [285, 94.6]
+        anchor:
+          shift: [-13.5, -53.5]
+    _cutoutRaw: [
+        # keys_raw,
+        # ^_rectangle_fill,
+        _plate60,
+      ]
+    cutout:
+      - type: outline
+        name: _cutoutRaw
+        fillet: 2
+    _keycap_outlines:
+      - type: keys
+        side: both
+        size: [1cx - 0.5, 1cy - 0.5] # Choc keycaps are 17.5 x 16.5
+        bound: false
+        tags: [1u]
+    _keycap_outlines15:
+      - type: keys
+        side: both
+        size: [1.5cx - 0.5, 1cy - 0.5] # Choc keycaps are 17.5 x 16.5
+        bound: false
+        tags: [15u]
+    keycaps_combined: [+_keycap_outlines, +_keycap_outlines15]
+    preview: [+keycaps_combined, ^_plate60]
+pcbs:
+  green60:
+    outlines:
+      board:
+        outline: cutout
+      keycaps:
+        outline: keycaps_combined
+        layer: Eco1.User
+    footprints:
+      promicro:
+        # Use pins:
+        # - left side: 2,3,4 - 20,19
+        # - center: 21
+        # - right side: 9,8,7 - 10,16
+        type: promicro
+        anchor:
+          shift: [285/2 - 10, 30]
+          rotate: 0
