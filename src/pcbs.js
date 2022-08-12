@@ -4,9 +4,9 @@ const prep = require('./prepare')
 const anchor_lib = require('./anchor')
 
 const kicad_prefix = `
-(kicad_pcb (version 20171130) (host pcbnew 5.1.6)
+(kicad_pcb (version 20211014) (generator pcbnew)
 
-  (page A3)
+  (paper "A3")
   (title_block
     (title KEYBOARD_NAME_HERE)
     (rev VERSION_HERE)
@@ -18,29 +18,42 @@ const kicad_prefix = `
   )
 
   (layers
-    (0 F.Cu signal)
-    (31 B.Cu signal)
-    (32 B.Adhes user)
-    (33 F.Adhes user)
-    (34 B.Paste user)
-    (35 F.Paste user)
-    (36 B.SilkS user)
-    (37 F.SilkS user)
-    (38 B.Mask user)
-    (39 F.Mask user)
-    (40 Dwgs.User user)
-    (41 Cmts.User user)
-    (42 Eco1.User user)
-    (43 Eco2.User user)
-    (44 Edge.Cuts user)
-    (45 Margin user)
-    (46 B.CrtYd user)
-    (47 F.CrtYd user)
-    (48 B.Fab user)
-    (49 F.Fab user)
+    (0 "F.Cu" signal)
+    (31 "B.Cu" signal)
+    (32 "B.Adhes" user "B.Adhesive")
+    (33 "F.Adhes" user "F.Adhesive")
+    (34 "B.Paste" user)
+    (35 "F.Paste" user)
+    (36 "B.SilkS" user "B.Silkscreen")
+    (37 "F.SilkS" user "F.Silkscreen")
+    (38 "B.Mask" user)
+    (39 "F.Mask" user)
+    (40 "Dwgs.User" user "User.Drawings")
+    (41 "Cmts.User" user "User.Comments")
+    (42 "Eco1.User" user "User.Eco1")
+    (43 "Eco2.User" user "User.Eco2")
+    (44 "Edge.Cuts" user)
+    (45 "Margin" user)
+    (46 "B.CrtYd" user "B.Courtyard")
+    (47 "F.CrtYd" user "F.Courtyard")
+    (48 "B.Fab" user)
+    (49 "F.Fab" user)
   )
 
   (setup
+    (stackup
+      (layer "F.SilkS" (type "Top Silk Screen"))
+      (layer "F.Paste" (type "Top Solder Paste"))
+      (layer "F.Mask" (type "Top Solder Mask") (thickness 0.01))
+      (layer "F.Cu" (type "copper") (thickness 0.035))
+      (layer "dielectric 1" (type "core") (thickness 1.51) (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+      (layer "B.Cu" (type "copper") (thickness 0.035))
+      (layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))
+      (layer "B.Paste" (type "Bottom Solder Paste"))
+      (layer "B.SilkS" (type "Bottom Silk Screen"))
+      (copper_finish "None")
+      (dielectric_constraints no)
+    )
     (last_trace_width 0.25)
     (trace_clearance 0.2)
     (zone_clearance 0.508)
@@ -68,13 +81,15 @@ const kicad_prefix = `
     (aux_axis_origin 0 0)
     (visible_elements FFFFFF7F)
     (pcbplotparams
-      (layerselection 0x010fc_ffffffff)
-      (usegerberextensions false)
+      (layerselection 0x00010f0_ffffffff)
+      (disableapertmacros false)
+      (usegerberextensions true)
       (usegerberattributes true)
       (usegerberadvancedattributes true)
       (creategerberjobfile true)
+      (svguseinch false)
+      (svgprecision 6)
       (excludeedgelayer true)
-      (linewidth 0.100000)
       (plotframeref false)
       (viasonmask false)
       (mode 1)
@@ -82,18 +97,22 @@ const kicad_prefix = `
       (hpglpennumber 1)
       (hpglpenspeed 20)
       (hpglpendiameter 15.000000)
+      (dxfpolygonmode true)
+      (dxfimperialunits true)
+      (dxfusepcbnewfont true)
       (psnegative false)
       (psa4output false)
       (plotreference true)
       (plotvalue true)
       (plotinvisibletext false)
-      (padsonsilk false)
+      (sketchpadsonfab false)
       (subtractmaskfromsilk false)
       (outputformat 1)
       (mirror false)
-      (drillshape 1)
+      (drillshape 0)
       (scaleselection 1)
-      (outputdirectory ""))
+      (outputdirectory "")
+    )
   )
 `
 
@@ -113,22 +132,35 @@ const kicad_netclass = `
   )
 `
 
-const makerjs2kicad = exports._makerjs2kicad = (model, layer='Edge.Cuts') => {
+const makerjs2kicad = exports._makerjs2kicad = (model, layer = 'Edge.Cuts') => {
     const grs = []
     const xy = val => `${val[0]} ${-val[1]}`
+    const wrap = val => ((val % 180) + 180) % 180
     m.model.walk(model, {
         onPath: wp => {
             const p = wp.pathContext
             switch (p.type) {
                 case 'line':
-                    grs.push(`(gr_line (start ${xy(p.origin)}) (end ${xy(p.end)}) (angle 90) (layer ${layer}) (width 0.15))`)
+                    grs.push(`(gr_line (start ${xy(p.origin)}) (end ${xy(p.end)}) (layer ${layer}) (width 0.15))`)
                     break
                 case 'arc':
-                    const arc_center = p.origin
-                    const angle_start = p.startAngle > p.endAngle ? p.startAngle - 360 : p.startAngle
-                    const angle_diff = Math.abs(p.endAngle - angle_start)
-                    const arc_end = m.point.rotate(m.point.add(arc_center, [p.radius, 0]), angle_start, arc_center)
-                    grs.push(`(gr_arc (start ${xy(arc_center)}) (end ${xy(arc_end)}) (angle ${-angle_diff}) (layer ${layer}) (width 0.15))`)
+                    /**
+                     * @type {import("makerjs").IPathArc}
+                     */
+                    const arc = p
+                    const origin = arc.origin
+                    const angle_start = arc.startAngle// arc.startAngle > arc.endAngle ? arc.startAngle - 360 : arc.startAngle
+                    const angle_end = arc.endAngle// arc.startAngle > arc.endAngle ? arc.endAngle - 360 : arc.endAngle
+                    // const angle_diff = Math.abs(arc.endAngle - angle_start)
+
+                    const angleDiff = Math.abs(wrap(angle_end) - wrap(angle_start))
+                    const arcStart = m.point.rotate(m.point.add(arc.origin, [arc.radius, 0]), angle_start, origin)
+                    const arcEnd = m.point.rotate(m.point.add(arc.origin, [arc.radius, 0]), angle_end, origin)
+                    const arcMiddle = m.point.rotate(m.point.add(arc.origin, [arc.radius, 0]), angle_start + angleDiff / 2, origin)
+
+                    // grs.push(`${JSON.stringify(p)}`)
+                    // grs.push(`angle_start: ${angle_start}, angle_end: ${angle_end}, angleDiff: ${angleDiff}`)
+                    grs.push(`(gr_arc (start ${xy(arcStart)}) (mid ${xy(arcMiddle)}) (end ${xy(arcEnd)}) (layer ${layer}) (width 0.15))`)
                     break
                 case 'circle':
                     const circle_center = p.origin
@@ -245,7 +277,7 @@ exports.parse = (config, points, outlines, units) => {
 
         // outline conversion
         if (a.type(pcb_config.outlines)() == 'array') {
-            pcb_config.outlines = {...pcb_config.outlines}
+            pcb_config.outlines = { ...pcb_config.outlines }
         }
         const config_outlines = a.sane(pcb_config.outlines || {}, `pcbs.${pcb_name}.outlines`, 'object')()
         const kicad_outlines = {}
@@ -256,7 +288,7 @@ exports.parse = (config, points, outlines, units) => {
         }
 
         // making a global net index registry
-        const nets = {"": 0}
+        const nets = { "": 0 }
         const net_indexer = net => {
             if (nets[net] !== undefined) return nets[net]
             const index = Object.keys(nets).length
@@ -277,17 +309,17 @@ exports.parse = (config, points, outlines, units) => {
         // key-level footprints
         for (const [p_name, point] of Object.entries(points)) {
             for (const [f_name, f] of Object.entries(point.meta.footprints || {})) {
-                footprints.push(footprint(f, `${p_name}.footprints.${f_name}`, points, point, net_indexer, component_indexer, units, {references}))
+                footprints.push(footprint(f, `${p_name}.footprints.${f_name}`, points, point, net_indexer, component_indexer, units, { references }))
             }
         }
 
         // global one-off footprints
         if (a.type(pcb_config.footprints)() == 'array') {
-            pcb_config.footprints = {...pcb_config.footprints}
+            pcb_config.footprints = { ...pcb_config.footprints }
         }
         const global_footprints = a.sane(pcb_config.footprints || {}, `pcbs.${pcb_name}.footprints`, 'object')()
         for (const [gf_name, gf] of Object.entries(global_footprints)) {
-            footprints.push(footprint(gf, `pcbs.${pcb_name}.footprints.${gf_name}`, points, undefined, net_indexer, component_indexer, units, {references}))
+            footprints.push(footprint(gf, `pcbs.${pcb_name}.footprints.${gf_name}`, points, undefined, net_indexer, component_indexer, units, { references }))
         }
 
         // finalizing nets
