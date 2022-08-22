@@ -144,28 +144,47 @@ module.exports = {
       let front = ''
       let back = ''
 
-      const via = `
-        (pad "1" thru_hole circle (at 0 -2.675) (size 0.3 0.3) (drill 0.1) (layers *.Cu *.Mask) ${p.net.from.str})
+      const via = `(pad "1" thru_hole circle (at 0 -2.675) (size 0.5 0.5) (drill 0.3) (layers *.Cu) ${p.net.from.str})
       `
 
       if (reverse && hotswap && diodes) {
         // 2 to diode
-        front += `
-          (fp_line (start -8.275 -3.75) (end -6.049 -1.524) (layer "F.Cu") (width 0.2))
-          (fp_line (start 0.762 4.55) (end -5.334 -1.524) (layer "F.Cu") (width 0.2))
-          (fp_line (start 1.65 4.55) (end 0.762 4.55) (layer "F.Cu") (width 0.2))
-          (fp_line (start -6.049 -1.524) (end -5.334 -1.524) (layer "F.Cu") (width 0.2))
+        front += `(pad "2" smd custom (at 1.65 4.55 ${p.rot}) (size 0 0) (layers "F.Cu")
+          (options (clearance outline) (anchor circle))
+          (primitives
+            (gr_line (start -7.572 -5.947) (end -9.925 -8.3) (width 0.2))
+            (gr_line (start -6.349 -5.947) (end -7.572 -5.947) (width 0.2))
+            (gr_line (start -0.402 0) (end -6.349 -5.947) (width 0.2))
+            (gr_line (start 0 0) (end -0.402 0) (width 0.2))
+          )
+          ${p.local_net('D').str})
         `
-        back += `
-          (fp_line (start 8.275 0) (end 3.703 4.572) (layer "B.Cu") (width 0.2))
-          (fp_line (start 8.275 -3.75) (end 8.275 0) (layer "B.Cu") (width 0.2))
-          (fp_line (start 3.703 4.572) (end 1.65 4.572) (layer "B.Cu") (width 0.2))
+        back += `(pad "2" smd custom (at 1.65 4.55 ${p.rot}) (size 0 0) (layers "B.Cu")
+          (options (clearance outline) (anchor circle))
+          (primitives
+            (gr_line (start 0 0) (end 3 0) (width 0.2))
+            (gr_line (start 6.625 -8.3) (end 6.625 -3.65) (width 0.2))
+            (gr_line (start 3 0) (end 6.625 -3.65) (width 0.2))
+          )
+          ${p.local_net('D').str})
         `
       }
       if (reverse && hotswap) {
         // 1 to uvia
-        front += `(fp_line (start 3.275 -5.95) (end 0 -2.675) (layer "F.Cu") (width 0.2))`
-        back += `(fp_line (start -3.275 -5.95) (end 0 -2.675) (layer "B.Cu") (width 0.2))`
+        front += `(pad "1" smd custom (at 0 -2.675 ${p.rot}) (size 0 0) (layers "F.Cu")
+          (options (clearance outline) (anchor circle))
+          (primitives
+            (gr_line (start 0 0) (end 3.275 -3.275) (width 0.2))
+          )
+          ${p.net.from.str})
+        `
+        back += `(pad "1" smd custom (at 0 -2.675 ${p.rot}) (size 0 0) (layers "B.Cu")
+          (options (clearance outline) (anchor circle))
+          (primitives
+            (gr_line (start 0 0) (end -3.275 -3.275) (width 0.2))
+          )
+          ${p.net.from.str})
+        `
       }
 
       return `

@@ -23,6 +23,11 @@ points:
       columns:
         outer:
           row_overrides:
+            bottom:
+              column_net: P3
+              row_net: P19
+              mirror:
+                column_net: P8
             home:
               column_net: P4
               row_net: P10 # P19
@@ -35,7 +40,7 @@ points:
                 column_net: P9
         pinkie:
           spread: cx
-          stagger: cy/-2
+          stagger: cy/7
           row_overrides:
             bottom:
               column_net: P3
@@ -56,9 +61,9 @@ points:
                 column_net: P9
         ring:
           spread: cx-1
-          rotate: -8
+          rotate: -7
           origin: [-12, -16]
-          stagger: 12
+          stagger: 11
           row_overrides:
             bottom:
               column_net: P4
@@ -101,8 +106,9 @@ points:
                 column_net: P7
         index:
           spread: cx
-          stagger: -6 +cy
-          row_overrides:
+          stagger: -6
+          rows:
+            thumb:
             bottom:
               column_net: P5
               row_net: P18
@@ -121,7 +127,8 @@ points:
         inner:
           spread: cx
           stagger: -2
-          row_overrides:
+          rows:
+            thumb:
             bottom:
               column_net: P21
               row_net: P18
@@ -139,8 +146,10 @@ points:
                 column_net: P10
         center:
           spread: cx
-          stagger: 10
+          stagger: 7
           row_overrides:
+            thumb:
+              shift: [0, -cy*0.3]
             home:
               column_net: P20
               row_net: P18
@@ -161,37 +170,6 @@ points:
         bottom:
         home:
         top:
-    thumbfan:
-      anchor:
-        ref: board_inner_bottom
-        shift: [-cx/2, -cy]
-      columns:
-        near:
-          rows:
-            thumb:
-              column_net: P21
-              row_net: P19
-              bind: [5, 8, 0, 0]
-              mirror:
-                column_net: P10
-        home:
-          spread: 21.25
-          rotate: 16
-          origin: [-2, 13]
-          row_overrides:
-            thumb:
-              column_net: P20
-              row_net: P19
-              tags:
-                15u: true
-                1u: false
-                rotate: 90
-              mirror:
-                column_net: P16
-      rows:
-        thumb:
-      key:
-        size: 2u
   rotate: -20
 
 outlines:
@@ -204,19 +182,19 @@ outlines:
       - type: rectangle
         size: [285/2 -cx/3, 94.6]
         anchor:
-          shift: [2.17cx, -7.4cy]
+          shift: [2.17cx, -6.7cy]
     _cutBottom:
       - type: circle
-        radius: 200
+        radius: 232
         anchor:
           ref: board_ring_bottom
-          shift: [-10, -225]
+          shift: [-0, -260]
     _cutTop:
       - type: circle
-        radius: 180
+        radius: 175
         anchor:
           ref: board_middle_top
-          shift: [25, -165]
+          shift: [17, -162]
     _cutoutRaw: [
         # _keys_raw,
         _plate60,
