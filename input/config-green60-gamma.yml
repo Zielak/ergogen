@@ -106,9 +106,8 @@ points:
                 column_net: P7
         index:
           spread: cx
-          stagger: -6
-          rows:
-            thumb:
+          stagger: -6 +cy
+          row_overrides:
             bottom:
               column_net: P5
               row_net: P18
@@ -127,8 +126,7 @@ points:
         inner:
           spread: cx
           stagger: -2
-          rows:
-            thumb:
+          row_overrides:
             bottom:
               column_net: P21
               row_net: P18
@@ -146,23 +144,11 @@ points:
                 column_net: P10
         center:
           spread: cx
-          stagger: 7
+          stagger: cy -3
           row_overrides:
-            thumb:
-              shift: [0, -cy*0.3]
             home:
               column_net: P20
               row_net: P18
-              tags:
-                15u: true
-                1u: false
-              rotate: 90
-              mirror:
-                column_net: P16
-            top:
-              column_net: P20
-              row_net: P14
-              shift: [0, cy*0.3]
               mirror:
                 column_net: P16
       rows:
@@ -170,7 +156,44 @@ points:
         bottom:
         home:
         top:
+    thumbfan:
+      anchor:
+        ref: board_inner_bottom
+        shift: [-cx/2, -cy]
+      columns:
+        near:
+          rows:
+            thumb:
+              column_net: P21
+              row_net: P19
+              tags:
+                15u: true
+                1u: false
+                rotate: 90
+              mirror:
+                column_net: P10
+        home:
+          spread: cx*1.25
+          rotate: -103
+          origin: [4.8, 1.6]
+          row_overrides:
+            thumb:
+              column_net: P20
+              row_net: P19
+              tags:
+                15u: true
+                1u: false
+                rotate: 90
+              mirror:
+                column_net: P16
+      rows:
+        thumb:
+      key:
+        size: 2u
   rotate: -20
+#  mirror:
+#    ref: board_center_thumb
+#    distance: 60
 
 outlines:
   exports:
@@ -182,7 +205,7 @@ outlines:
       - type: rectangle
         size: [285/2 -cx/3, 94.6]
         anchor:
-          shift: [2.17cx, -6.7cy]
+          shift: [2.05cx, -6.7cy]
     _cutBottom:
       - type: circle
         radius: 232
@@ -191,10 +214,10 @@ outlines:
           shift: [-0, -260]
     _cutTop:
       - type: circle
-        radius: 175
+        radius: 160
         anchor:
           ref: board_middle_top
-          shift: [17, -162]
+          shift: [14, -147]
     _cutoutRaw: [
         # _keys_raw,
         _plate60,
